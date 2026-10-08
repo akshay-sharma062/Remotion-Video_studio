@@ -1,0 +1,41 @@
+# Script — organic-affiliate-marketing (Shobhit)
+Transcribed from: assets/projects/organic-affiliate-marketing/footage/Shobhit.MP4
+Tool: faster-whisper small, word-timestamps enabled
+Total duration: 00:01:07.95 (67.95s)
+Total words: 208
+
+---
+
+So, hello everyone.
+See, I know there are a lot of you who want to start [premiums?],
+generate results, want to do exactly the same thing in affiliate marketing.
+They are different sources through which you can do affiliate marketing,
+organically, through ads, through email marketing.
+And as a beginner, if you don't have a budget, you can't do all the ads,
+email marketing, so you have the option to do organic marketing.
+Right?
+And we use the same thing to generate sales for ourselves.
+And our mentees are generating results for themselves,
+which you have already seen.
+Right?
+And this Sunday, we are going to do a session in which we are calling them.
+Exactly.
+I am going to share the strategy and they have implemented the things for themselves.
+We are going to share them.
+And in the end, how can you start it?
+How can you take action?
+How can you start implementation?
+We are going to give you all the details of that.
+So, make sure you join our session on Sunday 11am
+and you can't miss it because it is going to be exclusive
+and we are not replying it.
+So, make sure this is for it.
+
+---
+
+## Timing notes
+
+Word-level timestamps are in work/organic-affiliate-marketing/prep/audio/original.json.
+Sections flagged for review:
+- Line 3: "premiums" — unclear, likely "programs" (0:05.340–0:05.600)
+- Line 8: "studies" at 0:19.220–0:19.600 — unclear, possibly "strategies"

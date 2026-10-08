@@ -1,0 +1,11 @@
+<template lang="jsonc">
+{
+  // Remotion config: https://www.remotion.dev/docs/config
+  "bundle": {
+    "sourceMap": "inline"
+  },
+  "browser": true,
+  "chromiumOptions": {
+    // Remotion uses its own bundled Chromium
+  }
+}

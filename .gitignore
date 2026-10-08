@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Generated render/output artifacts
+out/
+work/
+
+# Claude session data
+.claude/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Root-level generated video files
+/CorporateCareerGrowthAmana-916.mp4
+/TestClip.mp4
+/test-clip.mp4
+/organic-affiliate-marketing.mp4
+
+# Root-level generated numeric stills
+/60
+/120
+/186
+/240
+/270
+/400
+/513
+/565
+/870
+/1000
+/1050
+/1405
+
+# General temporary files
+*.log
+.DS_Store
+Thumbs.db

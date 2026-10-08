@@ -1,0 +1,44 @@
+{
+  "name": "creator-editing-os",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Creator Editing OS — a Remotion-based video editing studio",
+  "scripts": {
+    "studio": "npx remotion studio",
+    "check": "npm run typecheck && npm run lint && npm run motion-lint",
+    "new-video": "tsx scripts/new-video.ts",
+    "prep": "tsx scripts/prep.ts",
+    "prep-montage": "tsx scripts/prep-montage.ts",
+    "beat-map": "tsx scripts/beat-map.ts",
+    "refs": "tsx scripts/refs.ts",
+    "stills": "tsx scripts/stills.ts",
+    "render-final": "tsx scripts/render-final.ts",
+    "clean": "tsx scripts/clean.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src scripts --ext .ts,.tsx",
+    "motion-lint": "tsx scripts/motion-lint.ts"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.530",
+    "@remotion/google-fonts": "^4.0.530",
+    "@remotion/install-whisper-cpp": "^4.0.530",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "remotion": "^4.0.530",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.71.1-alpha.1",
+    "@typescript-eslint/parser": "^8.71.1-alpha.1",
+    "eslint": "^9.11.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "jiti": "^2.7.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
