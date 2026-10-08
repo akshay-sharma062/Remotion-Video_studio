@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		
+		<link id="__remotion_favicon" rel="icon" type="image/png" href="/favicon.ico" />
+		<title>Remotion Studio</title>
+	</head>
+	<body>
+		<script>window.remotion_numberOfAudioTags = 0;</script>
+		<script>window.remotion_audioLatencyHint = "playback";</script>
+		<script>window.remotion_experimentalKeepAudioContextAlive = false;</script>
+		<script>window.remotion_sampleRate = null;</script>
+		<script>window.remotion_previewSampleRate = null;</script>
+		<script>window.remotion_logLevel = "info";</script>
+		<script>window.remotion_staticBase = "/static-3e2b140ec035";</script>
+		<script>window.remotion_editorName = "C:\WINDOWS\notepad.exe";</script>
+		<script>window.remotion_projectName = "VideoStudio";</script>
+		<script>window.remotion_publicPath = "/";</script>
+		<script>window.remotion_audioEnabled = true;</script>
+		<script>window.remotion_videoEnabled = true;</script>
+		<script>window.remotion_studioConfig = {"maxTimelineTracks":null,"keyboardShortcuts":null,"askAIEnabled":true,"elementLibraries":[],"interactivityEnabled":true,"keyboardShortcutsEnabled":true,"bufferStateDelayInMilliseconds":null,"defaultCodingAgent":null,"defaultEditor":"custom","publicLicenseKey":null,"canvasTabsEnabled":true,"configFileStudioSettings":{"askAIEnabled":null,"audioLatencyHint":null,"beepOnFinish":null,"enableCrossSiteIsolation":null,"interactivityEnabled":null,"keyboardShortcutsEnabled":null,"logLevel":null,"maxTimelineTracks":null,"numberOfSharedAudioTags":null,"rspack":null,"canvasTabsEnabled":null}};</script>
+		<script>window.remotion_renderDefaults = {"darkMode":false,"jpegQuality":80,"scale":1,"logLevel":"info","codec":"h264","crf":null,"concurrency":2,"maxConcurrency":4,"minConcurrency":1,"stillImageFormat":"png","videoImageFormat":"jpeg","muted":false,"enforceAudioTrack":false,"proResProfile":null,"x264Preset":"medium","gopSize":null,"pixelFormat":"yuv420p","audioBitrate":null,"videoBitrate":null,"encodingBufferSize":null,"encodingMaxRate":null,"everyNthFrame":1,"delayRenderTimeout":30000,"audioCodec":null,"disableWebSecurity":false,"headless":true,"ignoreCertificateErrors":false,"openGlRenderer":null,"offthreadVideoCacheSizeInBytes":null,"offthreadVideoThreads":null,"colorSpace":"default","multiProcessOnLinux":true,"userAgent":null,"repro":false,"numberOfGifLoops":null,"beepOnFinish":false,"forSeamlessAacConcatenation":false,"hardwareAcceleration":"disable","chromeMode":"headless-shell","mediaCacheSizeInBytes":null,"publicLicenseKey":null,"outputLocation":null,"allowHtmlInCanvas":false,"sampleRate":48000,"configFileRenderDefaults":{"codec":null,"proResProfile":null,"stillImageFormat":null,"videoImageFormat":null,"x264Preset":null}};</script>
+		<script>window.remotion_cwd = "C:\\Users\\_akshay_\\OneDrive\\VideoStudio";</script>
+		<script>window.remotion_fileSystemPlatform = "win32";</script>
+		<script>window.remotion_studioServerCommand = "npx remotion studio";</script>
+		<script>window.remotion_inputProps = "{}";</script>
+		<script>window.remotion_initialRenderQueue = [];</script>
+		<script>window.remotion_initialClientRenders = [];</script>
+		<script>window.process = {env: {}};</script>
+		
+		<script>window.remotion_isStudio = true;</script>
+		<script>window.remotion_isReadOnlyStudio = false;</script>
+		<script>window.remotion_staticFiles = [{"name":"AD-2.MP4","lastModified":1790855854995,"sizeInBytes":52410813,"src":"/static-3e2b140ec035/AD-2.MP4"},{"name":"index.html","lastModified":1790764993407,"sizeInBytes":425,"src":"/static-3e2b140ec035/index.html"},{"name":"projects/corporate-career-growth-amana/footage/testing-video-169.mp4","lastModified":1791286637941,"sizeInBytes":36755332,"src":"/static-3e2b140ec035/projects/corporate-career-growth-amana/footage/testing-video-169.mp4"},{"name":"projects/corporate-career-growth-amana/footage/testing-video.mp4","lastModified":1791025515828,"sizeInBytes":45424923,"src":"/static-3e2b140ec035/projects/corporate-career-growth-amana/footage/testing-video.mp4"},{"name":"projects/corporate-career-growth-amana/sfx.wav","lastModified":1791270337626,"sizeInBytes":4090638,"src":"/static-3e2b140ec035/projects/corporate-career-growth-amana/sfx.wav"},{"name":"projects/organic-affiliate-marketing/footage/Shobhit-original.mp4","lastModified":1791006519542,"sizeInBytes":52410813,"src":"/static-3e2b140ec035/projects/organic-affiliate-marketing/footage/Shobhit-original.mp4"},{"name":"projects/organic-affiliate-marketing/footage/Shobhit-portrait.mp4","lastModified":1791014035306,"sizeInBytes":20318589,"src":"/static-3e2b140ec035/projects/organic-affiliate-marketing/footage/Shobhit-portrait.mp4"},{"name":"projects/organic-affiliate-marketing/footage/Shobhit-rotated.mp4","lastModified":1790858932716,"sizeInBytes":42087086,"src":"/static-3e2b140ec035/projects/organic-affiliate-marketing/footage/Shobhit-rotated.mp4"},{"name":"projects/organic-affiliate-marketing/footage/Shobhit.MP4","lastModified":1790858005134,"sizeInBytes":52410813,"src":"/static-3e2b140ec035/projects/organic-affiliate-marketing/footage/Shobhit.MP4"},{"name":"test-clip.mp4","lastModified":1790831283557,"sizeInBytes":1437350,"src":"/static-3e2b140ec035/test-clip.mp4"}]</script>
+		<script>window.remotion_installedPackages = ["@remotion/cli","@remotion/google-fonts","@remotion/install-whisper-cpp","react","react-dom","remotion","zod","@types/node","@types/react","@types/react-dom","@typescript-eslint/eslint-plugin","@typescript-eslint/parser","eslint","eslint-plugin-react","eslint-plugin-react-hooks","jiti","prettier","tsx","typescript"]</script>
+		<script>window.remotion_packageManager = "npm"</script>
+		<script>window.remotion_publicFolderExists = "C:\\Users\\_akshay_\\OneDrive\\VideoStudio\\public";</script>
+		<script>
+				// Increment this value when the generated bundle format or behavior changes
+				// in a backwards-incompatible way. It is not the Remotion package version
+				// and should not be bumped for every generated HTML change.
+				// Keep it synchronized with requiredVersion in
+				// packages/renderer/src/set-props-and-env.ts by incrementing both values.
+				window.siteVersion = '11';
+				window.remotion_version = '4.0.530';
+		</script>
+		
+		<div id="video-container"></div>
+		<div id="__remotion-studio-container"></div>
+		<div id="remotion-error-overlay"></div>
+		<div id="server-disconnected-overlay"></div>
+		<div id="menuportal-0"></div>
+		<div id="menuportal-1"></div>
+		<div id="menuportal-2"></div>
+		<div id="menuportal-3"></div>
+		<div id="menuportal-4"></div>
+		<div id="menuportal-5"></div>
+		<script src="/bundle.js"></script>
+	</body>
+</html>

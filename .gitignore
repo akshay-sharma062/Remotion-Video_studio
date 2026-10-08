@@ -36,3 +36,11 @@ __pycache__/
 *.log
 .DS_Store
 Thumbs.db
+
+# Project source media — keep large/generated media out of Git
+/assets/**/footage/*.mp4
+/assets/**/footage/*.MP4
+/public/**/*.mp4
+/public/**/*.MP4
+/public/**/*.wav
+/references/*.mp4
