@@ -104,7 +104,7 @@ function PhraseHeadline({
 
   if (opacity < 0.01) return null;
 
-  // 16:9 headline type scale — impactful size with gradient overlay for readability
+  // 16:9 headline type scale
   const maxFontSize = stacked ? 90 : 100;
   const testFontSize = (word: string) => {
     const avgCharWidth = 0.58;
@@ -211,7 +211,7 @@ function PhraseHeadline({
     <div
       style={{
         position: "absolute",
-        top: 50,
+        top: 60,
         left: SAFE.left,
         right: SAFE.right,
         textAlign: "center",
@@ -350,6 +350,22 @@ export default function CorporateCareerGrowthAmana169() {
         <VideoLayer />
       </Sequence>
 
+      {PHRASES.map((phrase, i) => (
+        <Sequence
+          key={i}
+          from={phrase.from}
+          durationInFrames={phrase.to - phrase.from}
+        >
+          <PhraseHeadline
+            words={phrase.words}
+            phraseFrom={phrase.from}
+            phraseTo={phrase.to}
+            emphasisWord={phrase.emphasisWord}
+            stacked={phrase.stacked}
+          />
+        </Sequence>
+      ))}
+
       <Sequence from={0} durationInFrames={TOTAL_FRAMES}>
         <Audio
           src={staticFile(
@@ -366,22 +382,6 @@ export default function CorporateCareerGrowthAmana169() {
       <Sequence from={0} durationInFrames={TOTAL_FRAMES}>
         <TopGradient />
       </Sequence>
-
-      {PHRASES.map((phrase, i) => (
-        <Sequence
-          key={i}
-          from={phrase.from}
-          durationInFrames={phrase.to - phrase.from}
-        >
-          <PhraseHeadline
-            words={phrase.words}
-            phraseFrom={phrase.from}
-            phraseTo={phrase.to}
-            emphasisWord={phrase.emphasisWord}
-            stacked={phrase.stacked}
-          />
-        </Sequence>
-      ))}
     </AbsoluteFill>
   );
 }

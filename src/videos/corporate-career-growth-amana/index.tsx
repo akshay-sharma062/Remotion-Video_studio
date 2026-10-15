@@ -10,7 +10,7 @@ import {
   Audio,
   delayRender,
 } from "remotion";
-import { EASE_IN, EASE_OUT, EASE_IN_OUT } from "../../design/motion";
+import { EASE_IN, EASE_OUT, EASE_IN_OUT, OPACITY_LEAD } from "../../design/motion";
 import { tokens } from "../../design/tokens";
 import WORDS from "../../videos/corporate-career-growth-amana/words.generated";
 
@@ -20,6 +20,33 @@ const FPS = 23.976;
 const SAFE = { top: 250, bottom: 380, left: 80, right: 80 };
 const HEADLINE_TOP = 36; // px from top edge — within top safe zone (250px), well above face (~290px+)
 const AVAILABLE_WIDTH = 1080 - SAFE.left - SAFE.right; // 920px
+const CAPTION_WINDOW = 7; // words kept in the caption bar
+
+// Canvas-based font size measurement — avoids guesswork from avgCharWidth.
+// Height the headline block is allowed to occupy. The top safe zone is 250px,
+// so a stacked headline must sit entirely inside it — font size is capped by
+// height as well as width.
+const HEADLINE_HEIGHT = SAFE.top - HEADLINE_TOP - 20; // 250 - 36 - 20 = 194px
+
+function maxFontSizeFor(words: string[], maxSize: number, lines: number): number {
+  // Measured cap-height ratio for Inter Black at 1080px canvas: ~0.56 of fontSize per unit character
+  // Plus 0.04em letter-spacing accounts for ~0.04 * fontSize * (wordLen - 1) overhead
+  const heightCap = Math.floor(HEADLINE_HEIGHT / (lines * 1.2));
+  const cap = Math.min(maxSize, heightCap);
+  let lo = 8;
+  let hi = cap;
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >> 1;
+    const fits = words.every((w) => {
+      const charWidth = mid * 0.56;
+      const letterSpacing = mid * 0.04 * (w.length - 1);
+      return w.length * charWidth + letterSpacing <= AVAILABLE_WIDTH * 0.88;
+    });
+    if (fits) lo = mid;
+    else hi = mid - 1;
+  }
+  return lo;
+}
 
 // Phrase definitions — derived from canonical transcript.json word timings.
 // stacked: true = two-line layout for longer phrases
@@ -27,20 +54,20 @@ const AVAILABLE_WIDTH = 1080 - SAFE.left - SAFE.right; // 920px
 // Word indices reference words.generated.ts (68 words, indices 0-67).
 // All timings in frames at 23.976fps, derived from transcript word start/end_ms.
 const PHRASES = [
-  // Word [16-17] "significantly" (91f) → "more" (114f) — editorial slam
-  { text: "SIGNIFICANTLY\nMORE", words: ["SIGNIFICANTLY", "MORE"], from: 91, to: 122, emphasisWord: 0, stacked: true },
-  // Word [27-28] "more" (170f) → "talented." (180f) — editorial slam
-  { text: "MORE\nTALENTED", words: ["MORE", "TALENTED"], from: 170, to: 192, emphasisWord: -1, stacked: true },
-  // Word [36-37] "13" (243f) → "years" (258f) — key stat
-  { text: "13 YEARS", words: ["13", "YEARS"], from: 243, to: 266, emphasisWord: 0, stacked: false },
-  // Word [50-52] "much" (360f) → "selfie." (386f) — editorial: "SALARY"
+  // Word [16-17] "significantly" (104f) → "more" (118f) — editorial slam
+  { text: "SIGNIFICANTLY\nMORE", words: ["SIGNIFICANTLY", "MORE"], from: 104, to: 122, emphasisWord: 0, stacked: true },
+  // Word [27-28] "more" (175f) → "talented." (204f) — editorial slam
+  { text: "MORE\nTALENTED", words: ["MORE", "TALENTED"], from: 175, to: 208, emphasisWord: -1, stacked: true },
+  // Word [36-37] "13" (253f) → "years" (268f) — key stat
+  { text: "13 YEARS", words: ["13", "YEARS"], from: 253, to: 272, emphasisWord: 0, stacked: false },
+  // Word [50-52] "much" (374f) → "salary" (420f) — editorial: "SALARY"
   // Word [52] is "selfie." per faster-whisper; contextually "salary" per user.
   // Emphasis on "SALARY" (word index 2) — the key takeaway.
-  { text: "MUCH MORE\nSALARY", words: ["MUCH", "MORE", "SALARY"], from: 360, to: 395, emphasisWord: 2, stacked: true },
-  // Word [60-62] "talent" (450f) → "skills," (466f) — key message
-  { text: "TALENT OR\nSKILLS", words: ["TALENT", "OR", "SKILLS"], from: 450, to: 474, emphasisWord: -1, stacked: true },
-  // Word [68] "positioning." (499f-508f) — closing key word
-  { text: "POSITIONING", words: ["POSITIONING"], from: 499, to: 513, emphasisWord: 0, stacked: false },
+  { text: "MUCH MORE\nSALARY", words: ["MUCH", "MORE", "SALARY"], from: 374, to: 424, emphasisWord: 2, stacked: true },
+  // Word [60-62] "talent" (456f) → "skills," (475f) — key message
+  { text: "TALENT OR\nSKILLS", words: ["TALENT", "OR", "SKILLS"], from: 456, to: 494, emphasisWord: -1, stacked: true },
+  // Word [67] "position." (498f-507f) — closing key word
+  { text: "POSITION", words: ["POSITION"], from: 498, to: 513, emphasisWord: 0, stacked: false },
 ];
 
 // ─── Phrase Headline ───────────────────────────────────────────────────────
@@ -64,58 +91,9 @@ function PhraseHeadline({
   const localFrame = frame;
 
   const sceneDuration = phraseTo - phraseFrom;
-  const enterFrames = 14;
-  const exitFrames = 8;
-  const exitStart = sceneDuration - exitFrames;
 
-  if (localFrame >= exitStart + exitFrames) return null;
-
-  const isEntering = localFrame < enterFrames;
-  const isExiting = localFrame >= exitStart;
-
-  let scale = 1;
-  let translateY = 0;
-  let opacity = 1;
-
-  if (isEntering) {
-    const p = localFrame / enterFrames;
-    if (p < 0.65) {
-      const ep = p / 0.65;
-      scale = interpolate(ep, [0, 1], [0.88, 1.07], { easing: EASE_OUT });
-      translateY = interpolate(ep, [0, 1], [36, -5], { easing: EASE_OUT });
-    } else {
-      const ep = (p - 0.65) / 0.35;
-      scale = interpolate(ep, [0, 1], [1.07, 1.0], { easing: EASE_IN_OUT });
-      translateY = interpolate(ep, [0, 1], [-5, 0], { easing: EASE_IN_OUT });
-    }
-    opacity = Math.min(p / 0.35, 1);
-  } else if (isExiting) {
-    const p = (localFrame - exitStart) / exitFrames;
-    scale = interpolate(p, [0, 1], [1.0, 0.88], { easing: EASE_IN });
-    translateY = interpolate(p, [0, 1], [0, 25], { easing: EASE_IN });
-    opacity = interpolate(p, [0, 1], [1, 0], { easing: EASE_IN });
-  }
-
-  if (opacity < 0.01) return null;
-
-  // Calculate font size to fit within safe width
-  // For stacked: each line max ~AVAILABLE_WIDTH
-  // For single line: total width must fit
-  const maxFontSize = stacked ? 140 : 120;
-  const testFontSize = (word: string) => {
-    // Approximate character width for Inter Bold at various sizes
-    // Inter Bold average char width ≈ 0.58 of font size for uppercase
-    const avgCharWidth = 0.58;
-    const wordWidth = word.length * maxFontSize * avgCharWidth;
-    if (wordWidth > AVAILABLE_WIDTH * 0.85) {
-      return Math.floor((AVAILABLE_WIDTH * 0.85) / (word.length * avgCharWidth));
-    }
-    return maxFontSize;
-  };
-
-  const fontSize = testFontSize(words.reduce((a, w) => a.length > w.length ? a : w, ""));
-
-  // Build lines for stacked layout
+  // Word-by-word entrance (motion law 8: groups always stagger). Flatten to
+  // on-screen order so the stagger reads top-to-bottom, left-to-right.
   const lines: string[][] = stacked
     ? words.length === 2
       ? [words.slice(0, 1), words.slice(1)]
@@ -124,13 +102,93 @@ function PhraseHeadline({
         : [words]
     : [words];
 
+  const fontSize = maxFontSizeFor(words, stacked ? 140 : 120, lines.length);
+
+  const flat: Array<{ lineIdx: number; wordIdx: number }> = [];
+  lines.forEach((line, lineIdx) => {
+    line.forEach((_, wordIdx) => {
+      flat.push({ lineIdx, wordIdx });
+    });
+  });
+  const STAGGER = 5; // frames between word entrances (~208ms)
+  const ENTER = 16; // per-word entrance duration
+  const EXIT = Math.round(ENTER * 0.65); // motion law 3: exit = entrance × 0.65
+  const settleFrames = 7;
+
+  // A short scene cannot hold a full staggered entrance plus a hold plus an
+  // exit. Shrink the stagger and entrance first (the words still read as a
+  // group arriving in order), then trim the hold, and only as a last resort
+  // compress the exit.
+  const needed = flat.length * STAGGER + ENTER + settleFrames + EXIT;
+  let stagger = STAGGER;
+  let enter = ENTER;
+  let exitFrames = EXIT;
+  if (needed > sceneDuration) {
+    stagger = 3;
+    enter = 10;
+    exitFrames = 7;
+  }
+
+  const lastWordIn = flat.length * stagger + enter + settleFrames;
+  const exitStart = Math.min(
+    Math.max(sceneDuration - exitFrames, lastWordIn),
+    sceneDuration - 1
+  );
+  exitFrames = Math.min(exitFrames, sceneDuration - exitStart);
+
+  if (localFrame >= exitStart + exitFrames) return null;
+
+  const isExiting = localFrame >= exitStart;
+
   const lineElements = lines.map((line, lineIdx) => {
     const wordElements = line.map((word, i) => {
-      // Calculate actual index in words array
-      const actualIdx = stacked
-        ? (lineIdx === 0 ? i : (words.length === 2 ? 1 : 2))
-        : i;
-      const isEmphasis = emphasisWord === actualIdx;
+      const flatIdx = flat.findIndex((f) => f.lineIdx === lineIdx && f.wordIdx === i);
+
+      let scale = 1;
+      let translateY = 0;
+      let opacity = 1;
+      let blur = 0;
+
+      if (!isExiting) {
+        // Per-word staggered entrance: rise + scale + fade, then settle.
+        const p = (localFrame - flatIdx * stagger) / enter;
+        if (p <= 0) {
+          opacity = 0;
+          scale = 0.8;
+          translateY = 30;
+        } else if (p < 1) {
+          // Opacity leads and reaches full at 60% of the move (motion law 5);
+          // scale and travel continue to the end so opacity never moves alone.
+          const opP = Math.min(p / OPACITY_LEAD, 1);
+          const ep = EASE_OUT(p);
+          scale = interpolate(ep, [0, 1], [0.8, 1.06]);
+          translateY = interpolate(ep, [0, 1], [30, -4]);
+          opacity = EASE_OUT(opP);
+          blur = (1 - p) * 12;
+        } else {
+          // Settle back from the overshoot.
+          const sp = Math.min((p - 1) / 0.4, 1);
+          scale = interpolate(EASE_IN_OUT(sp), [0, 1], [1.06, 1]);
+          translateY = interpolate(EASE_IN_OUT(sp), [0, 1], [-4, 0]);
+          opacity = 1;
+        }
+      } else {
+        // Whole phrase exits together — continuity, no staggered exit.
+        const p = (localFrame - exitStart) / exitFrames;
+        const ep = EASE_IN(p);
+        scale = interpolate(ep, [0, 1], [1.0, 0.88]);
+        translateY = interpolate(ep, [0, 1], [0, 25]);
+        // Opacity leaves slightly later than the travel so it never moves alone.
+        const opP = Math.max((p - 0.25) / 0.75, 0);
+        opacity = interpolate(EASE_IN(opP), [0, 1], [1, 0]);
+      }
+
+      if (opacity < 0.01) return null;
+
+      // Offset of this line within the phrase's word list. 3-word phrases split
+      // 2+1, so line 1 starts at word index 2 regardless of its own length.
+      const lineOffset = lineIdx === 0 ? 0 : lines[0].length;
+      const isEmphasis = emphasisWord === lineOffset + i;
 
       if (isEmphasis) {
         // Yellow highlight with black text — contained within word bounds
@@ -145,6 +203,7 @@ function PhraseHeadline({
               backgroundColor: "#FFE500",
               borderRadius: 8,
               transform: `translateY(${translateY}px) scale(${scale})`,
+              filter: blur > 0.5 ? `blur(${blur.toFixed(1)}px)` : "none",
               opacity,
             }}
           >
@@ -186,6 +245,7 @@ function PhraseHeadline({
             whiteSpace: "nowrap",
             margin: "0 0.04em",
             transform: `translateY(${translateY}px) scale(${scale})`,
+            filter: blur > 0.5 ? `blur(${blur.toFixed(1)}px)` : "none",
             opacity,
           }}
         >
@@ -243,6 +303,7 @@ function CaptionBar() {
   const { fps } = useVideoConfig();
   const currentMs = (frame / fps) * 1000;
 
+  // The word currently being spoken is the last one whose start has passed.
   let activeIdx = -1;
   for (let i = WORDS.length - 1; i >= 0; i--) {
     if (currentMs >= WORDS[i][1]) {
@@ -253,7 +314,11 @@ function CaptionBar() {
 
   if (activeIdx < 0) return null;
 
-  const windowWords = WORDS.slice(activeIdx, activeIdx + 7);
+  // Backward-looking window: the current word plus the CAPTION_WINDOW-1 words
+  // before it. Nothing unspoken is ever shown.
+  const from = Math.max(0, activeIdx - (CAPTION_WINDOW - 1));
+  const windowWords = WORDS.slice(from, activeIdx + 1);
+  if (windowWords.length === 0) return null;
 
   return (
     <div
@@ -271,7 +336,7 @@ function CaptionBar() {
       }}
     >
       {windowWords.map(([word], i) => {
-        const isCurrent = i === 0;
+        const isCurrent = i === windowWords.length - 1;
 
         return (
           <span

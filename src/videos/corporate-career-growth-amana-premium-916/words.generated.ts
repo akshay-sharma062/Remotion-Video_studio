@@ -1,0 +1,88 @@
+// Word-level caption timing for corporate-career-growth-amana-premium-916.
+//
+// TIMING comes from faster-whisper (word-level timestamps, small model).
+// WORDS come from assets/projects/corporate-career-growth-amana/script.txt.
+//
+// CLAUDE.md rule (h): "Your script file (script.txt) is the truth for every
+// word, name, and spelling. The transcription supplies only timing."
+//
+// Two words were mis-heard by the transcription and are corrected here:
+//   [22] "being"      → "earning"  (script: "but earning significantly more")
+//   [59] "selfie."    → "faster."  (script: "move ahead much faster")
+//
+// Timing is untouched — only the spelling is corrected.
+type WordEntry = [string, number, number];
+
+const WORDS: WordEntry[] = [
+  ["There", 0, 240],
+  ["are", 240, 380],
+  ["people", 380, 660],
+  ["who", 660, 1060],
+  ["have", 1060, 1180],
+  ["almost", 1180, 1660],
+  ["the", 1660, 1880],
+  ["same", 1880, 2060],
+  ["experience", 2060, 2380],
+  ["you", 2380, 2640],
+  ["have,", 2640, 2840],
+  ["but", 3140, 3220],
+  ["they", 3220, 3420],
+  ["are", 3420, 3540],
+  ["not", 3540, 3660],
+  ["earning", 3660, 3800],
+  ["significantly", 3800, 4320],
+  ["more", 4320, 4740],
+  ["than", 4740, 4920],
+  ["you", 4920, 5120],
+  ["and", 5120, 5860],
+  ["this", 5860, 6040],
+  ["is", 6040, 6160],
+  ["not", 6160, 6360],
+  ["because", 6360, 6800],
+  ["they", 6800, 7000],
+  ["are", 7000, 7100],
+  ["more", 7100, 7300],
+  ["talented.", 7300, 7520],
+  ["Hi,", 8340, 8520],
+  ["I", 8920, 9060],
+  ["am", 9060, 9140],
+  ["Aman.", 9140, 9320],
+  ["I", 9560, 9660],
+  ["have", 9660, 9800],
+  ["worked", 9800, 10120],
+  ["13", 10120, 10540],
+  ["years", 10540, 10780],
+  ["in", 10780, 11180],
+  ["the", 11180, 11300],
+  ["corporate", 11300, 11560],
+  ["and", 11560, 12200],
+  ["I", 12200, 12360],
+  ["have", 12360, 12480],
+  ["seen", 12480, 12740],
+  ["people", 12740, 13040],
+  ["with", 13040, 13240],
+  ["similar", 13240, 13520],
+  ["experiences", 13520, 14240],
+  ["getting", 14240, 15020],
+  ["much", 15020, 15580],
+  ["more", 15580, 15780],
+  ["faster.", 15780, 16120],
+  ["And", 17340, 17500],
+  ["the", 17500, 17660],
+  ["difference", 17660, 17960],
+  ["is", 17960, 18320],
+  ["not", 18320, 18500],
+  ["in", 18500, 18620],
+  ["their", 18620, 18760],
+  ["talent", 18760, 19000],
+  ["or", 19000, 19280],
+  ["skills,", 19280, 19440],
+  ["the", 19720, 19820],
+  ["difference", 19820, 20180],
+  ["is", 20180, 20580],
+  ["in", 20580, 20680],
+  ["their", 20680, 20800],
+  ["positioning.", 20800, 21180],
+];
+
+export default WORDS;

@@ -3,9 +3,11 @@ import Sample from "./videos/sample";
 import TestClip from "./videos/test-clip/index";
 import DesignShowcase from "./videos/design-showcase/index";
 import ReferenceShowcase from "./videos/reference-showcase/index";
-import OrganicAffiliateMarketing from "./videos/organic-affiliate-marketing/index";
+import OrganicAffiliateMarketing from "./videos/organic-affiliate-marketing";
+import CorporateCareerGrowthAmanaPremium916 from "./videos/corporate-career-growth-amana-premium-916/index";
 import CorporateCareerGrowthAmana from "./videos/corporate-career-growth-amana/index";
 import CorporateCareerGrowthAmana169 from "./videos/corporate-career-growth-amana-169";
+import CorporateCareerGrowthAmanaReference from "./videos/corporate-career-growth-amana-reference-916";
 
 const Root: React.FC = () => {
   return (
@@ -67,6 +69,14 @@ const Root: React.FC = () => {
         height={1920}
       />
       <Composition
+        id="CorporateCareerGrowthAmana-Premium-916"
+        component={CorporateCareerGrowthAmanaPremium916}
+        durationInFrames={513}
+        fps={23.976}
+        width={1080}
+        height={1920}
+      />
+      <Composition
         id="CorporateCareerGrowthAmana-916"
         component={CorporateCareerGrowthAmana}
         durationInFrames={513}
@@ -81,6 +91,14 @@ const Root: React.FC = () => {
         fps={23.976}
         width={1920}
         height={1080}
+      />
+      <Composition
+        id="CorporateCareerGrowthAmana-Reference-916"
+        component={CorporateCareerGrowthAmanaReference}
+        durationInFrames={513}
+        fps={23.976}
+        width={1080}
+        height={1920}
       />
     </>
   );

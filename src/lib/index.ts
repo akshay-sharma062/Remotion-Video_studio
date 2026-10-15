@@ -5,6 +5,7 @@
  *
  * Usage:
  *   import { analyzeVideo } from "../lib";
+ *   import { EditDecisionEngine, SlamText } from "../lib";
  */
 
 export * from "./analysis";

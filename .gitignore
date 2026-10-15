@@ -5,6 +5,14 @@ node_modules/
 out/
 work/
 
+# Downloaded B-roll footage (generated assets)
+/public/**/b-roll/*.mp4
+
+# Secrets â€” provider API keys. Never commit.
+.env
+.env.*
+!.env.example
+
 # Claude session data
 .claude/
 
@@ -37,7 +45,7 @@ __pycache__/
 .DS_Store
 Thumbs.db
 
-# Project source media — keep large/generated media out of Git
+# Project source media ï¿½ keep large/generated media out of Git
 /assets/**/footage/*.mp4
 /assets/**/footage/*.MP4
 /public/**/*.mp4

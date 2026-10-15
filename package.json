@@ -13,6 +13,7 @@
     "refs": "tsx scripts/refs.ts",
     "stills": "tsx scripts/stills.ts",
     "render-final": "tsx scripts/render-final.ts",
+    "broll": "tsx scripts/broll-auto.ts",
     "clean": "tsx scripts/clean.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src scripts --ext .ts,.tsx",

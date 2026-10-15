@@ -170,14 +170,14 @@ export default function MontageTemplate() {
        *
        *   return (
        *     <React.Fragment key={i}>
-       *       {/* Outgoing clip (holds until beat) */}
+       *       // Outgoing clip (holds until beat)
        *       <Sequence from={prev.startFrame} durationInFrames={cutFrame - prev.startFrame}>
        *         <AbsoluteFill>
        *           <video src={prev.src} style={{width:'100%',height:'100%',objectFit:'cover'}} />
        *         </AbsoluteFill>
        *       </Sequence>
        *
-       *       {/* Transition zone */}
+       *       // Transition zone
        *       <Sequence from={cutFrame} durationInFrames={transFrames}>
        *         <BeatCutTransition transition={{type:"fade", duration: TRANSITION_DURATION}}>
        *           <video src={prev.src} style={{width:'100%',height:'100%',objectFit:'cover'}} />
@@ -187,7 +187,7 @@ export default function MontageTemplate() {
        *         </BeatCutTransitionIn>
        *       </Sequence>
        *
-       *       {/* Incoming clip (after transition) */}
+       *       // Incoming clip (after transition)
        *       <Sequence from={cutFrame + transFrames} durationInFrames={shot.endFrame - cutFrame - transFrames}>
        *         <AbsoluteFill>
        *           <video src={shot.src} style={{width:'100%',height:'100%',objectFit:'cover'}} />

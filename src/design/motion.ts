@@ -42,6 +42,9 @@ export function tween(progress: number, easing = EASE_OUT): number {
   return interpolate(progress, [0, 1], [0, 1], { easing });
 }
 
+/** Opacity finishes at this fraction of the move's total time (law 5). */
+export const OPACITY_LEAD = 0.6;
+
 /**
  * readableHold — minimum readable display time for N words.
  * 900ms + 250ms + 55ms per word.
