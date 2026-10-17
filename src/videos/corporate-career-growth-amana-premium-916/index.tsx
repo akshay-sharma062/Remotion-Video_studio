@@ -5,7 +5,9 @@ import {
   AbsoluteFill,
   interpolate,
   staticFile,
+  getStaticFiles,
   Video,
+  OffthreadVideo,
   Sequence,
   Audio,
 } from "remotion";
@@ -13,6 +15,13 @@ import { EASE_IN, EASE_OUT, EASE_IN_OUT, tween } from "../../design/motion";
 import { tokens } from "../../design/tokens";
 import WORDS from "./words.generated";
 import { BROLL_SEGMENTS } from "./broll-segments";
+import {
+  SPEAKER_ALPHA_FILE,
+  SPEAKER_ALPHA_FROM,
+  SPEAKER_ALPHA_FRAMES,
+  SPEAKER_ALPHA_TO,
+  inSpeakerAlphaSpan,
+} from "./speaker-alpha";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -198,29 +207,41 @@ function layoutHeadline(
 // 2. Place in assets/projects/corporate-career-growth-amana/b-roll/
 // 3. This component will automatically pick them up
 
-// Probed once at bundle time. A missing B-roll file must degrade to "no
-// B-roll" instead of throwing MEDIA_ELEMENT_ERROR, which aborts the render.
-const BROLL_AVAILABLE: Set<string> = new Set(
-  BROLL_SEGMENTS.filter((clip) => {
-    try {
-      // Resolve the public/ path that staticFile() will serve.
-      const fs = require("fs") as typeof import("fs");
-      const path = require("path") as typeof import("path");
-      return fs.existsSync(
-        path.join(process.cwd(), "public", clip.file)
-      );
-    } catch {
-      return false;
-    }
-  }).map((clip) => clip.file)
-);
+// Which B-roll files actually exist in public/, resolved at RUNTIME through
+// Remotion's own static-file registry.
+//
+// The previous implementation used Node's `fs.existsSync(path.join(process.cwd(),
+// "public", clip.file))`. In the browser bundle webpack replaces `require("fs")`
+// and `require("path")` with stubs that THROW ("Cannot find module 'fs'"), so the
+// surrounding try/catch swallowed the throw on every clip and the set was always
+// empty — B-roll silently never rendered, in the Studio and in renders alike.
+//
+// `getStaticFiles()` is the browser-safe equivalent: Remotion injects the public/
+// inventory into `window.remotion_staticFiles` for BOTH the Studio dev server and
+// the headless render bundle (the bundler emits the same @remotion/studio-shared
+// `studioHtml` template that writes the <script> tag). Each entry's `name` is the
+// path relative to public/ with forward slashes — exactly the form stored in
+// `clip.file` — so the match is a direct string comparison.
+//
+// Read lazily on first render (not at module scope) so the window global is
+// guaranteed to exist, and re-read per call so hot-reload of public/ is picked up.
+function availableBrollFiles(): Set<string> {
+  try {
+    return new Set(getStaticFiles().map((file) => file.name));
+  } catch {
+    // On the server / Remotion Player, getStaticFiles() returns [] and warns —
+    // never throws. A throw here would be a real API change; degrade to
+    // "no B-roll" rather than aborting the render.
+    return new Set<string>();
+  }
+}
 
 function BrollLayer() {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const currentMs = (frame / fps) * 1000;
 
-  const crossfadeDurationMs = 600; // crossfade in/out duration
+  const crossfadeDurationMs = 267; // crossfade in/out duration — from tokens.durations.fast
 
   // Frame-based comparison, EXCLUSIVE on the end frame (`< to`), matching the
   // documented `to` contract in ./broll-segments.ts and the curated manifest
@@ -243,7 +264,7 @@ function BrollLayer() {
   const clipDurationMs = clipEndMs - clipStartMs;
   const clipElapsedMs = currentMs - clipStartMs;
 
-  // Crossfade: fade in during first 600ms, fade out during last 600ms
+  // Crossfade: fade in during first 267ms, fade out during last 267ms
   let brollOpacity = 1;
   if (clipElapsedMs < crossfadeDurationMs) {
     brollOpacity = tween(clipElapsedMs / crossfadeDurationMs, EASE_OUT);
@@ -268,8 +289,7 @@ function BrollLayer() {
 
   // Guard: if the B-roll file has not been downloaded yet, render nothing
   // rather than throwing MEDIA_ELEMENT_ERROR and killing the whole render.
-  const clipExists = BROLL_AVAILABLE.has(activeClip.file);
-  if (!clipExists) return null;
+  if (!availableBrollFiles().has(activeClip.file)) return null;
 
   // ─── Source-frame budgeting ────────────────────────────────────────────────
   // How long this segment plays in the composition, in composition frames.
@@ -309,7 +329,20 @@ function BrollLayer() {
         opacity: brollOpacity,
       }}
     >
-      <Sequence from={0} durationInFrames={srcTotalFrames}>
+      {/*
+        The inner <Sequence> MUST start at the clip's composition start frame
+        (`activeClip.from`), not at 0.
+
+        A <Sequence from={0}> is mounted at composition frame 0 and unmounts
+        after `srcTotalFrames` frames (0..srcTotalFrames-1). For seg-6 that is
+        frames 0..51, so at frame 270 — where BrollLayer itself correctly finds
+        seg-6 active — the inner Sequence is already unmounted and the <Video>
+        never mounts. B-roll silently never appeared anywhere except the first
+        ~2s of the video. `from={activeClip.from}` remounts the sequence exactly
+        when the clip becomes active, so the <Video> plays its source from t=0
+        across the whole segment window.
+      */}
+      <Sequence from={activeClip.from} durationInFrames={srcTotalFrames}>
         <div
           style={{
             position: "absolute",
@@ -344,9 +377,16 @@ const FOOTAGE =
 const FIRST_FRAME_POSTER =
   "projects/corporate-career-growth-amana/footage/first-frame.jpg";
 
-function VideoLayer() {
-  const frame = useCurrentFrame();
-
+/**
+ * The talking head's scale for a given composition frame.
+ *
+ * Extracted so VideoLayer (the footage) and SpeakerCutout (the alpha clip over
+ * it) derive their transform from ONE function. If both computed this
+ * separately, a later edit to a punch could move one layer and not the other,
+ * and the cutout would visibly slide off the body it is supposed to be
+ * cut out of.
+ */
+function talkingHeadScale(frame: number): number {
   const slowZoom = interpolate(frame, [0, TOTAL_FRAMES], [1.0, 1.04], {
     easing: EASE_OUT,
   });
@@ -369,7 +409,30 @@ function VideoLayer() {
     }
   }
 
-  const scale = slowZoom + punch;
+  return slowZoom + punch;
+}
+
+/**
+ * The single geometry both talking-head layers share.
+ *
+ * 1080x1920 source into a 1080x1920 frame: objectFit "cover" scales by exactly
+ * 1.0, so the media box and the frame coincide and the centring translate is a
+ * no-op. It is kept explicit because the composition would need it the moment
+ * either dimension diverged.
+ */
+const TALKING_HEAD_MEDIA_STYLE: React.CSSProperties = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+};
+
+function VideoLayer() {
+  const frame = useCurrentFrame();
+  const scale = talkingHeadScale(frame);
 
   return (
     <div
@@ -387,16 +450,88 @@ function VideoLayer() {
         // The decoder paints nothing at exactly t=0, which would leave the
         // opening frame black. Hold a poster frame under it for one frame.
         poster={frame === 0 ? staticFile(FIRST_FRAME_POSTER) : undefined}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-        }}
+        style={TALKING_HEAD_MEDIA_STYLE}
       />
+    </div>
+  );
+}
+
+// ─── Speaker Cutout (speaker over B-roll) ────────────────────────────────────
+// For the B-roll span the speaker must sit IN FRONT of the footage, so the
+// wall behind them can be replaced by the clip. This layer is the speaker's
+// own pixels with real per-pixel alpha, produced by
+// scripts/build-speaker-alpha.py (see ./speaker-alpha.ts for provenance and
+// the verified alpha figures).
+//
+// WHY VideoLayer IS LEFT RUNNING UNDERNEATH
+//   VideoLayer is the only un-muted element in this composition, so it carries
+//   the voice. Unmounting it across the span — or muting it — would silently
+//   strip the narration and break lip-sync. It keeps playing; this layer only
+//   draws the speaker's silhouette over it, and B-roll is composited BETWEEN
+//   the two (z=1 footage, z=3 B-roll, z=4 cutout). Because the cutout is the
+//   speaker's exact pixels at the speaker's exact scale, the two layers are
+//   visually identical inside the silhouette, so the audio stays locked to the
+//   mouth on screen no matter what the underlying video is doing.
+//
+// ORDERING WITHIN THE SPAN
+//   The wall is opaque in the source footage, so simply drawing B-roll on top
+//   of the whole frame (today's behaviour) hides the speaker entirely. Stacking
+//   the cutout ABOVE the B-roll is what leaves the speaker visible while the
+//   background changes.
+//
+//   zIndex must be > 3: BrollLayer paints at z=3, so any value at or below 3
+//   would leave the clip covering the speaker again and the effect would be
+//   invisible. z=4 is the lowest value that clears it. The gradient stays at
+//   z=2, which is already below B-roll, so the cutout does not change the
+//   gradient's coverage of anything.
+function SpeakerCutout() {
+  const frame = useCurrentFrame();
+  const scale = talkingHeadScale(frame);
+
+  // Only the span is rendered. Outside it the opaque footage shows through
+  // untouched, which is the current approved look.
+  if (!inSpeakerAlphaSpan(frame)) return null;
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        transform: `scale(${scale})`,
+        zIndex: 4,
+      }}
+    >
+      {/*
+        The Sequence starts at the span's first frame and its frame 0 is
+        cutout frame 0, i.e. source frame 253. The span is the exact union of
+        the two B-roll segments (seg-6 253..304, seg-7 305..385), so cutout and
+        B-roll start and end on the same frame. A one-frame offset here would
+        flash the wall at a boundary.
+      */}
+      <Sequence from={SPEAKER_ALPHA_FROM} durationInFrames={SPEAKER_ALPHA_FRAMES}>
+        {/*
+          OffthreadVideo + transparent, not Video.
+
+          <Video> is an <Html5Video> whose alpha depends on the browser
+          compositing the WebM's alpha plane at paint time. During a headless
+          render Remotion does not paint through the browser's compositor, so
+          that alpha is not guaranteed to survive — the risk is the speaker
+          rendering as an opaque black box over the clip.
+
+          <OffthreadVideo transparent> is the supported path for alpha media:
+          it requests frames through Remotion's own extraction proxy in an
+          alpha-preserving format rather than relying on a painted <video>.
+
+          The cost is that frames are fetched per frame through the proxy
+          instead of being decoded in-process, which is why this is used ONLY
+          on the 133-frame span and not on the full 513-frame talking head.
+        */}
+        <OffthreadVideo
+          src={staticFile(SPEAKER_ALPHA_FILE)}
+          transparent
+          style={TALKING_HEAD_MEDIA_STYLE}
+        />
+      </Sequence>
     </div>
   );
 }
@@ -546,7 +681,16 @@ function PhraseHeadline({
             }}
           >
             {line.map((word, i) => {
-              const actualIdx = lineIdx === 0 ? i : (words.length === 2 ? 1 : 2);
+              // Map this word's position within its line back to its position in
+              // the full phrase so emphasisWord (phrase-relative) applies correctly.
+              //
+              // The offset MUST come from the line split layoutHeadline actually
+              // chose — it picks the split that yields the largest font size, NOT
+              // a fixed ceil(n/2). For ["EARNING","SIGNIFICANTLY","MORE"] and
+              // ["TALENT","OR","SKILLS"] the winning split is [1 | 2], so
+              // ceil(n/2)=2 would have mis-mapped every second-line word by one.
+              // lines[0].length is the true count of words on the first line.
+              const actualIdx = lineIdx === 0 ? i : lines[0].length + i;
               const isEmphasis = emphasisWord === actualIdx;
 
               if (isEmphasis) {
@@ -1114,6 +1258,16 @@ export default function CorporateCareerGrowthAmanaPremium916() {
       {/* B-roll crossfades — only active where manifest entries exist */}
       <Sequence from={0} durationInFrames={TOTAL_FRAMES}>
         <BrollLayer />
+      </Sequence>
+
+      {/*
+        Speaker cutout — over the B-roll span only. The speaker's own pixels
+        with alpha, placed ABOVE the B-roll so the backdrop changes while the
+        speaker stays visible in front of it. Outside the span this returns
+        null and the layering is exactly as before.
+      */}
+      <Sequence from={0} durationInFrames={TOTAL_FRAMES}>
+        <SpeakerCutout />
       </Sequence>
 
       {/* Each phrase: headline + graphic in local frame */}
